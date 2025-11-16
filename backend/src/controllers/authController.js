@@ -39,13 +39,10 @@ export const signup = asyncHandler(async (req, res) => {
     passwordHash: password,
     age: age || null,
     role: email === 'studentbatch2026@gmail.com' ? 'admin' : 'user',
+    lastLogin: new Date(),
+    isActive: true,
   })
 
-  await user.save()
-
-  // Update lastLogin and mark as active
-  user.lastLogin = new Date()
-  user.isActive = true
   await user.save()
 
   // Generate tokens for auto-login
@@ -86,9 +83,8 @@ export const login = asyncHandler(async (req, res) => {
     return res.status(403).json({ error: 'Account is deactivated' })
   }
 
-  // Update lastLogin
-  user.lastLogin = new Date()
-  await user.save()
+  // Update lastLogin using updateOne to avoid pre-save hook
+  await User.updateOne({ _id: user._id }, { lastLogin: new Date() })
 
   const { accessToken, refreshToken } = generateTokens(user._id, user.role)
 

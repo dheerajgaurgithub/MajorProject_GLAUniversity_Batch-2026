@@ -51,6 +51,7 @@ import reportRoutes from './src/routes/reports.js'
 import articleRoutes from './src/routes/articles.js'
 import adminRoutes from './src/routes/admin.js'
 import mlRoutes from './src/routes/ml.js'
+import contactRoutes from './src/routes/contact.js'
 
 // Register routes
 app.use('/api/auth', authRoutes)
@@ -59,6 +60,7 @@ app.use('/api/reports', reportRoutes)
 app.use('/api/articles', articleRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/ml', mlRoutes)
+app.use('/api/contact', contactRoutes)
 
 // 404 handler
 app.use((req, res) => {

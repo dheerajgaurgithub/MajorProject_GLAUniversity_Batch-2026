@@ -35,12 +35,14 @@ export default function DashboardPage() {
       try {
         const response = await fetch('/api/reports', {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
           }
         })
         if (response.ok) {
           const data = await response.json()
-          setReports(data)
+          // Handle both array and paginated response formats
+          const reportsArray = Array.isArray(data) ? data : data.data || data.reports || []
+          setReports(reportsArray)
         }
       } catch (error) {
         console.error('Failed to fetch reports:', error)

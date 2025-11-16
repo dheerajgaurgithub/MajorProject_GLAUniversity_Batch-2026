@@ -1,13 +1,21 @@
 import nodemailer from 'nodemailer'
+import { config } from 'dotenv'
 
-// Create transporter
-const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE || 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-})
+// Load environment variables
+config()
+
+// Create transporter function
+const createTransporter = () => {
+  return nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port: process.env.EMAIL_PORT || 587,
+    secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for other ports
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  })
+}
 
 const emailTemplates = {
   passwordReset: (data) => ({
@@ -107,14 +115,45 @@ const emailTemplates = {
   }),
 }
 
-export const sendEmail = async ({ to, subject, template, data }) => {
+export const sendEmail = async ({ to, subject, template, data, html }) => {
   try {
-    const emailTemplate = emailTemplates[template]
-    if (!emailTemplate) {
-      throw new Error(`Template '${template}' not found`)
+    console.log('[Email Service] Starting email send...')
+    console.log('[Email Service] To:', to)
+    console.log('[Email Service] Subject:', subject)
+    
+    // Create fresh transporter with current environment variables
+    const transporter = createTransporter()
+    console.log('[Email Service] Transporter created')
+    console.log('[Email Service] EMAIL_USER:', process.env.EMAIL_USER)
+    console.log('[Email Service] EMAIL_PASSWORD:', process.env.EMAIL_PASSWORD ? 'SET' : 'NOT SET')
+    
+    let emailContent
+    
+    if (template && emailTemplates[template]) {
+      // Use existing template system
+      console.log('[Email Service] Using template:', template)
+      emailContent = emailTemplates[template](data)
+      emailContent = {
+        subject: emailContent.subject,
+        html: emailContent.html
+      }
+    } else if (html) {
+      // Direct HTML content (for contact form)
+      console.log('[Email Service] Using direct HTML')
+      emailContent = {
+        subject: subject,
+        html: html
+      }
+    } else if (data) {
+      // HTML content passed as data parameter
+      console.log('[Email Service] Using data as HTML')
+      emailContent = {
+        subject: subject,
+        html: data
+      }
+    } else {
+      throw new Error('No valid content provided for email')
     }
-
-    const emailContent = emailTemplate(data)
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -123,11 +162,15 @@ export const sendEmail = async ({ to, subject, template, data }) => {
       html: emailContent.html,
     }
 
+    console.log('[Email Service] Mail options prepared')
+    console.log('[Email Service] From:', process.env.EMAIL_USER)
+    
     const info = await transporter.sendMail(mailOptions)
-    console.log('[v0] Email sent successfully:', info.messageId)
+    console.log('[Email Service] Email sent successfully:', info.messageId)
     return info
   } catch (error) {
-    console.error('[v0] Error sending email:', error.message)
+    console.error('[Email Service] Error sending email:', error.message)
+    console.error('[Email Service] Full error:', error)
     throw error
   }
 }

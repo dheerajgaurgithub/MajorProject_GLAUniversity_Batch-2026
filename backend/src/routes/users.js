@@ -11,15 +11,15 @@ import {
 
 const router = express.Router()
 
-// Public routes
-router.get('/:id', getUserById)
-
-// Protected routes
-router.get('/profile/me', protect, getProfile)
-router.put('/profile/me', protect, updateProfile)
+// Protected routes (must be before :id to avoid matching conflict)
+router.get('/me', protect, getProfile)
+router.put('/me', protect, updateProfile)
 router.put('/notifications', protect, updateNotifications)
 
 router.get('/admin/profile', protect, getAdminProfile)
 router.put('/admin/profile', protect, updateAdminProfile)
+
+// Public routes
+router.get('/:id', getUserById)
 
 export default router

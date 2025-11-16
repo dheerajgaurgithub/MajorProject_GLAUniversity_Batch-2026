@@ -1,30 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const mockArticles = [
-  {
-    id: '1',
-    title: 'Early Detection: Why Screening Matters',
-    slug: 'early-detection-screening',
-    excerpt: 'Learn why regular cancer screening can save lives and improve treatment outcomes significantly.',
-    category: 'screening',
-    author: 'Dr. Sarah Johnson',
-    createdAt: '2025-11-01'
-  },
-  {
-    id: '2',
-    title: 'Healthy Lifestyle and Cancer Prevention',
-    slug: 'healthy-lifestyle-prevention',
-    excerpt: 'Discover practical ways to reduce cancer risk through diet, exercise, and lifestyle changes.',
-    category: 'prevention',
-    author: 'Dr. Michael Chen',
-    createdAt: '2025-10-28'
-  },
-]
-
 export async function GET(request: NextRequest) {
   try {
-    return NextResponse.json(mockArticles)
+    // Get query parameters
+    const { searchParams } = new URL(request.url)
+    const page = searchParams.get('page') || '1'
+    const limit = searchParams.get('limit') || '10'
+    const tag = searchParams.get('tag') || ''
+    const search = searchParams.get('search') || ''
+
+    // Build query string
+    let query = `?page=${page}&limit=${limit}`
+    if (tag) query += `&tag=${tag}`
+    if (search) query += `&search=${search}`
+
+    // Call backend API
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000'
+    const response = await fetch(`${backendUrl}/api/articles${query}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { message: 'Failed to fetch articles' },
+        { status: response.status }
+      )
+    }
+
+    const data = await response.json()
+    return NextResponse.json(data)
   } catch (error) {
+    console.error('Articles error:', error)
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

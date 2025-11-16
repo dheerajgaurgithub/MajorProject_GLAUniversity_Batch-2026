@@ -11,20 +11,27 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Mock admin stats - replace with database aggregation
-    const stats = {
-      totalUsers: 245,
-      totalReports: 1250,
-      positiveResults: 125,
-      weeklyGrowth: 12,
-      systemUptime: 99.8,
-      avgProcessingTime: 2.3,
-      modelAccuracy: 98.7,
-      activeUsers: 142
+    // Call backend API
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000'
+    const response = await fetch(`${backendUrl}/api/admin/stats`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+    })
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { message: 'Failed to fetch stats' },
+        { status: response.status }
+      )
     }
 
+    const stats = await response.json()
     return NextResponse.json(stats)
   } catch (error) {
+    console.error('Admin stats error:', error)
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

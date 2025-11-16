@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
 import { PrivateRoute } from '@/components/private-route'
@@ -22,31 +22,37 @@ interface Report {
   reviewed: boolean
 }
 
-const mockReports: Report[] = [
-  {
-    id: 'R001',
-    patientName: 'John Doe',
-    email: 'john@example.com',
-    status: 'done',
-    prediction: { cancer: true, confidence: 0.82 },
-    createdAt: '2025-11-14',
-    reviewed: false
-  },
-  {
-    id: 'R002',
-    patientName: 'Jane Smith',
-    email: 'jane@example.com',
-    status: 'done',
-    prediction: { cancer: false, confidence: 0.15 },
-    createdAt: '2025-11-13',
-    reviewed: true
-  },
-]
-
 export default function ReportsPage() {
-  const [reports, setReports] = useState<Report[]>(mockReports)
+  const [reports, setReports] = useState<Report[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Fetch reports from backend
+    const fetchReports = async () => {
+      try {
+        const token = localStorage.getItem('accessToken')
+        const response = await fetch('/api/admin/reports', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        if (response.ok) {
+          const data = await response.json()
+          // Handle both array and paginated response formats
+          const reportsArray = Array.isArray(data) ? data : data.data || data.reports || []
+          setReports(reportsArray)
+        }
+      } catch (error) {
+        console.error('Failed to fetch reports:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchReports()
+  }, [])
 
   const filteredReports = reports.filter(report =>
     (report.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||

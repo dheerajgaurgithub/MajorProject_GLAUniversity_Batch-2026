@@ -1,33 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Mock reports database
-const mockReports = [
-  {
-    id: 'report_001',
-    patientName: 'John Doe',
-    age: 58,
-    status: 'done',
-    prediction: {
-      cancer: true,
-      predictedType: 'Lung Cancer',
-      confidence: 0.82
-    },
-    createdAt: new Date(Date.now() - 86400000).toISOString()
-  },
-  {
-    id: 'report_002',
-    patientName: 'Jane Smith',
-    age: 45,
-    status: 'done',
-    prediction: {
-      cancer: false,
-      predictedType: 'Breast Cancer',
-      confidence: 0.15
-    },
-    createdAt: new Date(Date.now() - 172800000).toISOString()
-  }
-]
-
 export async function GET(request: NextRequest) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '')
@@ -39,8 +11,37 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    return NextResponse.json(mockReports)
+    // Get query parameters
+    const { searchParams } = new URL(request.url)
+    const page = searchParams.get('page') || '1'
+    const limit = searchParams.get('limit') || '10'
+    const search = searchParams.get('search') || ''
+
+    // Build query string
+    let query = `?page=${page}&limit=${limit}`
+    if (search) query += `&search=${search}`
+
+    // Call backend API
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000'
+    const response = await fetch(`${backendUrl}/api/reports${query}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+    })
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { message: 'Failed to fetch reports' },
+        { status: response.status }
+      )
+    }
+
+    const data = await response.json()
+    return NextResponse.json(data)
   } catch (error) {
+    console.error('Reports error:', error)
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

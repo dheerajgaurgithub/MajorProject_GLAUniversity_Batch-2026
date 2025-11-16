@@ -12,7 +12,19 @@ export const metadata: Metadata = {
   title: 'MediDetect - AI Cancer Risk Assessment',
   description: 'Advanced AI-powered cancer risk detection and awareness platform. Upload medical data and get instant predictions with expert insights.',
   keywords: 'cancer detection, AI diagnosis, medical prediction, health screening',
-  generator: 'v0.app'
+  generator: 'v0.app',
+  icons: {
+    icon: [
+      { url: '/logo.png', sizes: '32x32' },
+      { url: '/logo.png', sizes: '64x64' },
+      { url: '/logo.png', sizes: '128x128' },
+      { url: '/logo.png', sizes: '256x256' },
+    ],
+    shortcut: '/logo.png',
+    apple: [
+      { url: '/logo.png', sizes: '180x180' },
+    ],
+  },
 }
 
 export const viewport: Viewport = {
@@ -29,7 +41,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} bg-background text-foreground`}>
+      <body className={`${geistSans.className} bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100`}>
         <ThemeProvider>
           <LanguageProvider>
             <AuthProvider>

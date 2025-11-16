@@ -19,39 +19,36 @@ interface User {
   reportsCount: number
 }
 
-const mockUsers: User[] = [
-  {
-    id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
-    role: 'user',
-    createdAt: '2025-10-15',
-    isActive: true,
-    reportsCount: 5
-  },
-  {
-    id: '2',
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    role: 'user',
-    createdAt: '2025-10-20',
-    isActive: true,
-    reportsCount: 3
-  },
-  {
-    id: '3',
-    name: 'Bob Johnson',
-    email: 'bob@example.com',
-    role: 'user',
-    createdAt: '2025-11-01',
-    isActive: false,
-    reportsCount: 0
-  },
-]
-
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>(mockUsers)
+  const [users, setUsers] = useState<User[]>([])
   const [searchTerm, setSearchTerm] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    // Fetch users from backend
+    const fetchUsers = async () => {
+      try {
+        const token = localStorage.getItem('accessToken')
+        const response = await fetch('/api/admin/users', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        if (response.ok) {
+          const data = await response.json()
+          // Handle both array and paginated response formats
+          const usersArray = Array.isArray(data) ? data : data.data || data.users || []
+          setUsers(usersArray)
+        }
+      } catch (error) {
+        console.error('Failed to fetch users:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUsers()
+  }, [])
 
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

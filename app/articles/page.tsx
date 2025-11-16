@@ -25,75 +25,12 @@ const articleCategories = [
   { id: 'treatment', label: 'Treatment', color: 'bg-orange-100 text-orange-800' },
 ]
 
-const mockArticles: Article[] = [
-  {
-    id: '1',
-    title: 'Early Detection: Why Screening Matters',
-    slug: 'early-detection-screening',
-    excerpt: 'Learn why regular cancer screening can save lives and improve treatment outcomes significantly.',
-    category: 'screening',
-    author: 'Dr. Sarah Johnson',
-    createdAt: '2025-11-01',
-    image: 'https://via.placeholder.com/400x250?text=Early+Detection'
-  },
-  {
-    id: '2',
-    title: 'Healthy Lifestyle and Cancer Prevention',
-    slug: 'healthy-lifestyle-prevention',
-    excerpt: 'Discover practical ways to reduce cancer risk through diet, exercise, and lifestyle changes.',
-    category: 'prevention',
-    author: 'Dr. Michael Chen',
-    createdAt: '2025-10-28',
-    image: 'https://via.placeholder.com/400x250?text=Healthy+Lifestyle'
-  },
-  {
-    id: '3',
-    title: 'Understanding Common Cancer Symptoms',
-    slug: 'cancer-symptoms-guide',
-    excerpt: 'An overview of common warning signs to watch for and when to seek medical attention.',
-    category: 'symptoms',
-    author: 'Dr. Emily Watson',
-    createdAt: '2025-10-25',
-    image: 'https://via.placeholder.com/400x250?text=Cancer+Symptoms'
-  },
-  {
-    id: '4',
-    title: 'Modern Cancer Treatment Options',
-    slug: 'cancer-treatment-options',
-    excerpt: 'Explore the latest advancements in cancer treatment including surgery, chemotherapy, and immunotherapy.',
-    category: 'treatment',
-    author: 'Dr. James Peterson',
-    createdAt: '2025-10-22',
-    image: 'https://via.placeholder.com/400x250?text=Treatment'
-  },
-  {
-    id: '5',
-    title: 'Risk Factors You Should Know About',
-    slug: 'cancer-risk-factors',
-    excerpt: 'Understanding genetic and environmental risk factors can help you take preventive measures.',
-    category: 'prevention',
-    author: 'Dr. Lisa Anderson',
-    createdAt: '2025-10-20',
-    image: 'https://via.placeholder.com/400x250?text=Risk+Factors'
-  },
-  {
-    id: '6',
-    title: 'Questions to Ask Your Doctor',
-    slug: 'questions-for-doctor',
-    excerpt: 'Essential questions to discuss with your healthcare provider about cancer screening and prevention.',
-    category: 'screening',
-    author: 'Dr. Robert Wilson',
-    createdAt: '2025-10-18',
-    image: 'https://via.placeholder.com/400x250?text=Doctor+Questions'
-  },
-]
-
 export default function ArticlesPage() {
   const router = useRouter()
-  const [articles, setArticles] = useState<Article[]>(mockArticles)
+  const [articles, setArticles] = useState<Article[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Fetch articles from backend
@@ -103,7 +40,9 @@ export default function ArticlesPage() {
         const response = await fetch('/api/articles')
         if (response.ok) {
           const data = await response.json()
-          setArticles(data)
+          // Handle both array and paginated response formats
+          const articlesArray = Array.isArray(data) ? data : data.data || data.articles || []
+          setArticles(articlesArray)
         }
       } catch (error) {
         console.error('Failed to fetch articles:', error)
@@ -112,8 +51,7 @@ export default function ArticlesPage() {
       }
     }
 
-    // Uncomment to use real API
-    // fetchArticles()
+    fetchArticles()
   }, [])
 
   const filteredArticles = articles.filter(article => {

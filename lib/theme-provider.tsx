@@ -13,49 +13,75 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('system')
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light')
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    const storedTheme = localStorage.getItem('theme') as Theme | null
-    if (storedTheme) {
-      setThemeState(storedTheme)
+  // Initialize theme synchronously from localStorage
+  const getInitialTheme = (): Theme => {
+    if (typeof window === 'undefined') return 'system'
+    try {
+      const stored = localStorage.getItem('theme') as Theme | null
+      if (stored && ['light', 'dark', 'system'].includes(stored)) return stored
+    } catch (e) {
+      // ignore
     }
-  }, [])
+    return 'system'
+  }
 
+  const getInitialResolvedTheme = (): 'light' | 'dark' => {
+    if (typeof window === 'undefined') return 'light'
+    try {
+      const theme = getInitialTheme()
+      if (theme === 'system') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      }
+      return theme as 'light' | 'dark'
+    } catch (e) {
+      return 'light'
+    }
+  }
+
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme)
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(getInitialResolvedTheme)
+
+  // Apply theme to DOM whenever theme or resolvedTheme changes
   useEffect(() => {
-    if (!mounted) return
+    const currentResolvedTheme = theme === 'system'
+      ? window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+      : theme
 
-    const updateTheme = () => {
-      const currentTheme = theme === 'system'
-        ? window.matchMedia('(prefers-color-scheme: dark)').matches
-          ? 'dark'
-          : 'light'
-        : theme
+    setResolvedTheme(currentResolvedTheme)
+    
+    // Update HTML class immediately
+    document.documentElement.classList.remove('light', 'dark')
+    document.documentElement.classList.add(currentResolvedTheme)
+    
+    console.log('[Theme] Applied:', currentResolvedTheme, 'HTML class:', document.documentElement.className)
+  }, [theme])
 
-      setResolvedTheme(currentTheme)
+  // Listen for system preference changes when theme is 'system'
+  useEffect(() => {
+    if (theme !== 'system') return
+
+    const handleSystemThemeChange = () => {
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      const newTheme = isDark ? 'dark' : 'light'
+      setResolvedTheme(newTheme)
       document.documentElement.classList.remove('light', 'dark')
-      document.documentElement.classList.add(currentTheme)
+      document.documentElement.classList.add(newTheme)
     }
 
-    updateTheme()
-
-    if (theme === 'system') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-      mediaQuery.addEventListener('change', updateTheme)
-      return () => mediaQuery.removeEventListener('change', updateTheme)
-    }
-  }, [theme, mounted])
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    mediaQuery.addEventListener('change', handleSystemThemeChange)
+    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange)
+  }, [theme])
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme)
-    localStorage.setItem('theme', newTheme)
-  }
-
-  if (!mounted) {
-    return <>{children}</>
+    try {
+      localStorage.setItem('theme', newTheme)
+    } catch (e) {
+      // ignore
+    }
   }
 
   return (

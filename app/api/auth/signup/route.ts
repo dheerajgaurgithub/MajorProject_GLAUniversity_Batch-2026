@@ -1,50 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Mock database
-let users: any[] = [
-  {
-    id: '1',
-    name: 'Dheeraj Gaur',
-    email: 'studentbatch2026@gmail.com',
-    password: 'gla@2026',
-    role: 'admin'
-  }
-]
-
 export async function POST(request: NextRequest) {
   try {
     const { name, email, password, age } = await request.json()
 
-    // Check if user already exists
-    if (users.find(u => u.email === email)) {
+    // Call backend API for signup
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000'
+    const response = await fetch(`${backendUrl}/api/auth/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password, age })
+    })
+
+    if (!response.ok) {
+      const data = await response.json()
       return NextResponse.json(
-        { message: 'Email already registered' },
-        { status: 400 }
+        { message: data.error || 'Signup failed' },
+        { status: response.status }
       )
     }
 
-    // Create new user
-    const newUser = {
-      id: 'user_' + Math.random().toString(36).substr(2, 9),
-      name,
-      email,
-      password,
-      age: age || null,
-      role: 'user'
-    }
-
-    users.push(newUser)
+    const data = await response.json()
 
     return NextResponse.json({
       message: 'Account created successfully',
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role
-      }
-    })
+      user: data.user,
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken
+    }, { status: 201 })
   } catch (error) {
+    console.error('Signup error:', error)
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }
