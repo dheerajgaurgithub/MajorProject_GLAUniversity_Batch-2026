@@ -1,0 +1,117 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --font-sans: 'Geist', 'Geist Fallback';
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+
+  /* CHANGE: Updated color palette to warm, healthcare-friendly colors for patient appeal */
+  /* Primary: Trusting teal-blue, Secondary: Calming ocean tones, Accents: Warm orange/coral */
+  
+  /* Light Mode */
+  --color-background: #fcfcfd;
+  --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-primary: #0891b2;
+  --color-primary-foreground: #ffffff;
+  --color-primary-light: #06b6d4;
+  --color-secondary: #e0f2fe;
+  --color-secondary-foreground: #164e63;
+  --color-accent: #f97316;
+  --color-accent-light: #fb923c;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-destructive: #ef4444;
+  --color-muted: #e2e8f0;
+  --color-muted-foreground: #64748b;
+  --color-border: #e2e8f0;
+  --color-input: #ffffff;
+  --color-ring: #06b6d4;
+  --radius: 0.75rem;
+  
+  /* Dark Mode */
+  --color-background-dark: #0f172a;
+  --color-foreground-dark: #f1f5f9;
+  --color-card-dark: #1e293b;
+  --color-card-foreground-dark: #f1f5f9;
+  --color-primary-dark: #06b6d4;
+  --color-primary-foreground-dark: #0f172a;
+  --color-secondary-dark: #164e63;
+  --color-secondary-foreground-dark: #e0f2fe;
+  --color-accent-dark: #f97316;
+  --color-border-dark: #334155;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground transition-colors duration-300;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-semibold;
+  }
+
+  /* CHANGE: Added smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@supports (selector(::-webkit-scrollbar)) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary rounded-full hover:bg-primary-light;
+  }
+}
+
+/* CHANGE: Added gradient backgrounds for visual appeal */
+.gradient-primary {
+  background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+}
+
+.gradient-warm {
+  background: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+}
+
+/* CHANGE: Added smooth animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.6s ease-out;
+}
