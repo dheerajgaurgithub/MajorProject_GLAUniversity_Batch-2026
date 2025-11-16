@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, ReactNode } from 'react'
-import { useAuth } from '@/components/auth-context'
+import { useAuth } from '@/lib/auth-context'
 
 interface PrivateRouteProps {
   children: ReactNode

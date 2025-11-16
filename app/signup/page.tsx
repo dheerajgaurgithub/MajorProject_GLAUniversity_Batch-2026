@@ -66,9 +66,21 @@ export default function SignupPage() {
         throw new Error(data.message || 'Signup failed')
       }
 
+      const { accessToken, user, refreshToken } = await response.json()
+      
+      // Auto-login after successful registration
+      localStorage.setItem('token', accessToken)
+      localStorage.setItem('refreshToken', refreshToken)
+      localStorage.setItem('user', JSON.stringify(user))
+
       setSuccess(true)
       setTimeout(() => {
-        router.push('/login')
+        // Redirect based on user role
+        if (user.role === 'admin') {
+          router.push('/admin')
+        } else {
+          router.push('/dashboard')
+        }
       }, 2000)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed. Please try again.')
@@ -88,9 +100,9 @@ export default function SignupPage() {
             </div>
             <h1 className="text-2xl font-bold mb-2">Account Created!</h1>
             <p className="text-muted-foreground mb-6">
-              Your account has been successfully created. Redirecting to login...
+              Your account has been successfully created. You will be logged in automatically...
             </p>
-            <p className="text-sm text-muted-foreground">You will be redirected in 2 seconds</p>
+            <p className="text-sm text-muted-foreground">Redirecting to your dashboard in 2 seconds</p>
           </Card>
         </main>
         <Footer />

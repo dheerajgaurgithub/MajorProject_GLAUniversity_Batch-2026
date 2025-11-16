@@ -34,8 +34,8 @@ export default function LoginPage() {
         throw new Error(data.message || 'Login failed')
       }
 
-      const { token, user } = await response.json()
-      localStorage.setItem('token', token)
+      const { accessToken, user } = await response.json()
+      localStorage.setItem('token', accessToken)
       localStorage.setItem('user', JSON.stringify(user))
       
       // Redirect based on role

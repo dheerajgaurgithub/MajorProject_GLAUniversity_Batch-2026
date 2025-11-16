@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/lib/auth-context'
@@ -12,13 +12,14 @@ export const metadata: Metadata = {
   title: 'MediDetect - AI Cancer Risk Assessment',
   description: 'Advanced AI-powered cancer risk detection and awareness platform. Upload medical data and get instant predictions with expert insights.',
   keywords: 'cancer detection, AI diagnosis, medical prediction, health screening',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
-    generator: 'v0.app'
+  generator: 'v0.app'
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 }
 
 export default function RootLayout({

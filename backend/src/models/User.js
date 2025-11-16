@@ -72,11 +72,6 @@ const userSchema = new mongoose.Schema({
     enum: ['active', 'inactive', 'suspended'],
     default: 'active',
   },
-  adminLevel: {
-    type: String,
-    enum: ['super_admin', 'admin', 'moderator'],
-    default: null,
-  },
   emailNotifications: {
     type: Boolean,
     default: true,

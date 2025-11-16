@@ -43,7 +43,12 @@ export const signup = asyncHandler(async (req, res) => {
 
   await user.save()
 
-  // Generate tokens
+  // Update lastLogin and mark as active
+  user.lastLogin = new Date()
+  user.isActive = true
+  await user.save()
+
+  // Generate tokens for auto-login
   const { accessToken, refreshToken } = generateTokens(user._id, user.role)
 
   res.status(201).json({
@@ -56,6 +61,7 @@ export const signup = asyncHandler(async (req, res) => {
     },
     accessToken,
     refreshToken,
+    message: 'Registration successful'
   })
 })
 
