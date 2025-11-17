@@ -21,18 +21,39 @@ app.use(mongoSanitize())
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
   message: 'Too many requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
 })
 app.use('/api/', limiter)
 
 // CORS configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'https://medidetect.vercel.app',
+  'https://medidetect-git-main-dheerajgaur.vercel.app',
+  'https://medidetect-dheerajgaur.vercel.app'
+]
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true)
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      console.log(`[CORS] Blocked origin: ${origin}`)
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 }))
 
 // Body parsing middleware
@@ -71,9 +92,28 @@ app.use((req, res) => {
 app.use(errorHandler)
 
 const PORT = process.env.PORT || 5000
-app.listen(PORT, () => {
+
+const server = app.listen(PORT, () => {
   console.log(`[v0] Server running on port ${PORT}`)
   console.log(`[v0] Environment: ${process.env.NODE_ENV || 'development'}`)
+  console.log(`[v0] CORS origins: ${allowedOrigins.join(', ')}`)
+})
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('[v0] SIGTERM received, shutting down gracefully')
+  server.close(() => {
+    console.log('[v0] Process terminated')
+    process.exit(0)
+  })
+})
+
+process.on('SIGINT', () => {
+  console.log('[v0] SIGINT received, shutting down gracefully')
+  server.close(() => {
+    console.log('[v0] Process terminated')
+    process.exit(0)
+  })
 })
 
 export default app
