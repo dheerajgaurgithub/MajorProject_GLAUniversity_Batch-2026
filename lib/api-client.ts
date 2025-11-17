@@ -78,7 +78,7 @@ class APIClient {
 
   async request(endpoint: string, options: RequestInit = {}) {
     const url = `${this.baseURL}${endpoint}`
-    const includeAuth = !endpoint.includes('/auth/') || endpoint.includes('/auth/') && this.accessToken
+    const includeAuth = Boolean(!endpoint.includes('/auth/') || (endpoint.includes('/auth/') && this.accessToken))
 
     try {
       const response = await fetch(url, {

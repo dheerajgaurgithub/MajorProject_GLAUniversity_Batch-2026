@@ -49,13 +49,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         : 'light'
       : theme
 
+    console.log('[Theme] Effect triggered - theme:', theme, 'resolvedTheme:', currentResolvedTheme)
+    
     setResolvedTheme(currentResolvedTheme)
     
     // Update HTML class immediately
-    document.documentElement.classList.remove('light', 'dark')
-    document.documentElement.classList.add(currentResolvedTheme)
+    const htmlElement = document.documentElement
+    const previousClasses = htmlElement.className
+    htmlElement.classList.remove('light', 'dark')
+    htmlElement.classList.add(currentResolvedTheme)
     
-    console.log('[Theme] Applied:', currentResolvedTheme, 'HTML class:', document.documentElement.className)
+    console.log('[Theme] Applied:', currentResolvedTheme, 
+      'HTML classes changed from:', previousClasses, 
+      'to:', htmlElement.className)
   }, [theme])
 
   // Listen for system preference changes when theme is 'system'
@@ -76,11 +82,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme])
 
   const setTheme = (newTheme: Theme) => {
+    console.log('[Theme] Setting theme from', theme, 'to', newTheme)
     setThemeState(newTheme)
     try {
       localStorage.setItem('theme', newTheme)
+      console.log('[Theme] Saved to localStorage:', newTheme)
     } catch (e) {
-      // ignore
+      console.error('[Theme] Failed to save to localStorage:', e)
     }
   }
 

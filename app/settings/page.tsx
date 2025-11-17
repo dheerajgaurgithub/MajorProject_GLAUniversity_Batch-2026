@@ -93,7 +93,10 @@ export default function SettingsPage() {
                         {['light', 'dark', 'system'].map((themeOption) => (
                           <button
                             key={themeOption}
-                            onClick={() => setTheme(themeOption as any)}
+                            onClick={() => {
+                              console.log('[Settings] Theme button clicked:', themeOption, 'Current theme:', theme)
+                              setTheme(themeOption as any)
+                            }}
                             className={`group relative p-5 sm:p-6 rounded-xl border-2 transition-all duration-300 ${
                               theme === themeOption
                                 ? 'border-cyan-500 dark:border-cyan-400 bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 shadow-lg'
