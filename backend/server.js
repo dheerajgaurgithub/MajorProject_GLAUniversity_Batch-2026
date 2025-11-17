@@ -60,6 +60,27 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({ limit: '50mb', extended: true }))
 
+// Root route - API information
+app.get('/', (req, res) => {
+  res.json({
+    message: 'MediDetect Backend API',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      health: '/health',
+      auth: '/api/auth',
+      users: '/api/users',
+      reports: '/api/reports',
+      articles: '/api/articles',
+      admin: '/api/admin',
+      ml: '/api/ml',
+      contact: '/api/contact'
+    },
+    documentation: 'https://github.com/dheerajgaurgithub/MajorProject_GLAUniversity_Batch-2026/blob/main/backend/DEPLOYMENT.md',
+    frontend: 'https://medidetect.vercel.app'
+  })
+})
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'Backend is running', timestamp: new Date() })
